@@ -14,6 +14,12 @@ import nodejs.{Error, Buffer}
  * File system
  */
 object FS {
+  /**
+   * Open file
+   * @param path file path
+   * @param flag file system flag - 'r' reading, 'w' writing, etc
+   * @return fd
+   */
   def open(path: String, flag: String): Future[Int] = {
     val p = Promise[Int]()
     Native.open(path, flag, (e: Error, fd: Int) => Option(e) match {
@@ -22,6 +28,15 @@ object FS {
     })
     p.future
   }
+  /**
+   * Read data from a file
+   * @param fd file specifier
+   * @param buffer buffer that the data will be written to
+   * @param offset offset in the buffer to start writing at
+   * @param length number of bytes to read
+   * @param position where to begin reading
+   * @return Number of bytes read and the buffered data
+   */
   def read(fd: Int, buffer: Buffer, offset: Int, length: Int, position: Int): Future[(Int, Buffer)] = {
     val p = Promise[(Int, Buffer)]()
     Native.read(fd, buffer, offset, length, position, (e: Error, bytesRead: Int, buffer: Buffer) => Option(e) match {
@@ -31,11 +46,11 @@ object FS {
     p.future
   }
   /**
-   * Read directory
-   * @param path Directory path
-   * @return A list of directory names
+   * Reads the contents of a directory
+   * @param path directory path
+   * @return A list of directory/file names
    */
-  def readdir(path: String)(implicit ec: ExecutionContext): Future[Seq[String]] = {
+  def readdir(path: String): Future[Seq[String]] = {
     val p = Promise[Seq[String]]()
     Native.readdir(path, (e: Error, items: js.Array[String]) => Option(e) match {
       case Some(e) => p failure e
@@ -44,11 +59,11 @@ object FS {
     p.future
   }
   /**
-   * Get stats of directory
-   * @param path Directory path
-   * @return Stats of directory
+   * Get file stats
+   * @param path file path
+   * @return file stats
    */
-  def lstat(path: String)(implicit ec: ExecutionContext): Future[Stats] = {
+  def lstat(path: String): Future[Stats] = {
     val p = Promise[Stats]()
     Native.lstat(path, (e: Error, stats: Stats) => Option(e) match {
       case Some(e) => p failure e
@@ -57,7 +72,7 @@ object FS {
     p.future
   }
   /**
-   * List files in directory (excludes folders)
+   * Recursively List files in directory (excludes folders)
    * @param path Directory path
    * @return A list of all files in directory
    */
