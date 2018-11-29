@@ -2,27 +2,33 @@
  * Facade for FS
  * @author Kai Matsuda
  */
-package com.github.vangogh500.winbeboprenderer
+package com.github.vangogh500.music_metadata
 package facades
 package fs
 
-import scala.concurrent.{ Future, Promise, ExecutionContext }
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
-import nodejs.Error
+import scala.concurrent.{Future, Promise, ExecutionContext}
+import nodejs.{Error, Buffer}
 
 /**
  * File system
  */
 object FS {
-  /**
-   * Native FS
-   */
-  @js.native
-  @JSImport("fs", JSImport.Namespace)
-  private object Raw extends js.Object {
-    def readdir(path: String, callback: js.Function2[Error, js.Array[String], Unit]): Unit = js.native
-    def lstat(path: String, callback: js.Function2[Error, Stats, Unit]): Unit = js.native
+  def open(path: String, flag: String): Future[Int] = {
+    val p = Promise[Int]()
+    Native.open(path, flag, (e: Error, fd: Int) => Option(e) match {
+      case Some(e) => p failure e
+      case None => p success fd
+    })
+    p.future
+  }
+  def read(fd: Int, buffer: Buffer, offset: Int, length: Int, position: Int): Future[(Int, Buffer)] = {
+    val p = Promise[(Int, Buffer)]()
+    Native.read(fd, buffer, offset, length, position, (e: Error, bytesRead: Int, buffer: Buffer) => Option(e) match {
+      case Some(e) => p failure e
+      case None => p success (bytesRead, buffer)
+    })
+    p.future
   }
   /**
    * Read directory
@@ -31,7 +37,7 @@ object FS {
    */
   def readdir(path: String)(implicit ec: ExecutionContext): Future[Seq[String]] = {
     val p = Promise[Seq[String]]()
-    Raw.readdir(path, (e: Error, items: js.Array[String]) => Option(e) match {
+    Native.readdir(path, (e: Error, items: js.Array[String]) => Option(e) match {
       case Some(e) => p failure e
       case None => p success items
     })
@@ -44,7 +50,7 @@ object FS {
    */
   def lstat(path: String)(implicit ec: ExecutionContext): Future[Stats] = {
     val p = Promise[Stats]()
-    Raw.lstat(path, (e: Error, stats: Stats) => Option(e) match {
+    Native.lstat(path, (e: Error, stats: Stats) => Option(e) match {
       case Some(e) => p failure e
       case None => p success stats
     })
