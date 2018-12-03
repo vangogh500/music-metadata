@@ -26,7 +26,6 @@ trait Buffer extends js.Object {
   def readUIntLE(offset: Int, byteLength: Int): Int = js.native
 }
 
-
 /**
  * Buffer
  */
