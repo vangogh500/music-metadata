@@ -30,7 +30,7 @@ object FrameHeader {
     FS.read(fd, b, 0, 10, 10) map {
       case (_, buff) =>
         FrameHeader(
-          id = buff.toString("utf8", 0, 4),
+          title = buff.toString("utf8", 0, 4),
           frameSize = buff.toString("hex", 4, 8).toInt
         )
     }
