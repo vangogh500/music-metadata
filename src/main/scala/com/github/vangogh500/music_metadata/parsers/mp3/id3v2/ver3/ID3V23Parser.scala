@@ -9,10 +9,11 @@ import scala.concurrent.{Future, ExecutionContext}
 /**
  * ID3v2.3.* parser
  */
-class ID3V23Parser(fd: Int) extends ID3V2Parser {
+class ID3V23Parser(val fd: Int) extends ID3V2Parser {
   def parse()(implicit ec: ExecutionContext): Unit = {
     Header.parse(fd) foreach { h =>
       println(h)
     }
+    Frame.parse(fd, 10) foreach { tag => println(tag) }
   }
 }

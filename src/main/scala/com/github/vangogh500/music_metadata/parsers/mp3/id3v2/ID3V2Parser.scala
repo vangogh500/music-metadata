@@ -18,7 +18,7 @@ trait ID3V2Parser extends MP3MetaParser
  * ID3 version 2 parser
  */
 object ID3V2Parser {
-  def apply(fd: Int)(implicit ec: ExecutionContext): Future[ID3V2Parser] = {
+  def future(fd: Int)(implicit ec: ExecutionContext): Future[ID3V2Parser] = {
     val b = Buffer.alloc(2)
     FS.read(fd, b, 0, 2, 3) map {
       case (_, buff) => buff.toString("hex", 0, 2) match {

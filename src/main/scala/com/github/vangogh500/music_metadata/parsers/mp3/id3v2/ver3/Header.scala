@@ -10,12 +10,26 @@ import facades.nodejs.Buffer
 
 /**
  * ID3v2.3.* header
+ * @constructor
+ * @param flags Header flags
+ * @param size ID3 tag size in bytes
  */
 case class Header(
+  flags: HeaderFlags,
+  size: Int
+)
+
+/**
+ * ID3v2.3.* header flags
+ * @constructor
+ * @param unsynchronisation Unsynchronization used
+ * @param extendedHeader Extended header used
+ * @param experimental Experimental used
+ */
+case class HeaderFlags(
   unsynchronisation: Boolean,
   extendedHeader: Boolean,
-  experimental: Boolean,
-  size: Int
+  experimental: Boolean
 )
 
 /**
@@ -32,9 +46,11 @@ object Header {
       case (_, buff) =>
         val flags = buff.readUInt8(0)
         Header(
-          unsynchronisation = (128 & flags) != 0,
-          extendedHeader = (64 & flags) != 0,
-          experimental = (32 & flags) != 0,
+          HeaderFlags(
+            unsynchronisation = (128 & flags) != 0,
+            extendedHeader = (64 & flags) != 0,
+            experimental = (32 & flags) != 0
+          ),
           size = Array.tabulate(4)(i => {
             val byte = buff.readUInt8(1 + i)
             val pos = 3 - i
